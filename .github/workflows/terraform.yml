@@ -63,40 +63,42 @@ jobs:
         shell: bash
 
     steps:
-    # 1️⃣ Checkout repository
-    - name: Checkout
-      uses: actions/checkout@v4
+      # 1️⃣ Checkout repository
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    # 2️⃣ Configure AWS credentials from GitHub Secrets
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-west-1
+      # 2️⃣ Configure AWS credentials from GitHub Secrets
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-1
 
-    # 3️⃣ Setup Terraform
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v3
+      # 3️⃣ Setup Terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
 
-    # 4️⃣ Recreate dev.tfvars from secret
-    - name: Write dev.tfvars
-      run: |
-        echo "${{ secrets.TFVARS_DEV }}" > dev.tfvars
+      # 4️⃣ Write dev.tfvars SAFELY (preserves quotes & newlines)
+      - name: Write dev.tfvars
+        run: |
+          cat << 'EOF' > dev.tfvars
+          ${{ secrets.TFVARS_DEV }}
+          EOF
 
-    # 5️⃣ Terraform Init
-    - name: Terraform Init
-      run: terraform init
+      # 5️⃣ Terraform Init
+      - name: Terraform Init
+        run: terraform init
 
-    # 6️⃣ Terraform Format Check
-    - name: Terraform Format
-      run: terraform fmt -check
+      # 6️⃣ Terraform Format Check
+      - name: Terraform Format
+        run: terraform fmt -check
 
-    # 7️⃣ Terraform Plan
-    - name: Terraform Plan
-      run: terraform plan -var-file=dev.tfvars -input=false
+      # 7️⃣ Terraform Plan
+      - name: Terraform Plan
+        run: terraform plan -var-file=dev.tfvars -input=false
 
-    # 8️⃣ Terraform Apply (only on push to main)
-    - name: Terraform Apply
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: terraform apply -var-file=dev.tfvars -auto-approve -input=false
+      # 8️⃣ Terraform Apply (only on push to main)
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -var-file=dev.tfvars -auto-approve -input=false
