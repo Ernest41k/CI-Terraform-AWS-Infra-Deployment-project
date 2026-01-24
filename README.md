@@ -55,6 +55,10 @@ TFVARS_PROD
 AWS_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY
 
+# After Pushing Changes to Github Follow the following steps:
+- Navigate to the project repository
+- Click on "Actions"
+
 
 # Useful Git Commands
 - git log --> Full commit history with details

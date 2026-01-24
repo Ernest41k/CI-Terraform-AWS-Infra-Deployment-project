@@ -13,7 +13,7 @@ terraform {
 }
 
 module "vpc" {
-  source = "./vpc"
+  source         = "./vpc"
   vpc_cidr_block = var.vpc_cidr_block
-  tags   = local.project_tags
+  tags           = local.project_tags
 }
