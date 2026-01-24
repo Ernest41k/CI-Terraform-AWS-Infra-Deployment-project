@@ -6,14 +6,20 @@ on:
       confirm_destroy:
         description: "Type DESTROY to confirm"
         required: true
+        default: ""
 
 jobs:
   destroy:
     runs-on: ubuntu-latest
 
-    if: github.event.inputs.confirm_destroy == 'DESTROY'
-
     steps:
+      - name: Abort if not confirmed
+        run: |
+          if [ "${{ github.event.inputs.confirm_destroy }}" != "DESTROY" ]; then
+            echo "Destroy not confirmed, exiting."
+            exit 1
+          fi
+
       - uses: actions/checkout@v4
 
       - uses: hashicorp/setup-terraform@v3
