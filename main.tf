@@ -7,7 +7,7 @@ terraform {
     bucket         = "tfstate-remote-backend-0003"
     key            = "jupiter/statefile"
     region         = "us-east-2"
-    dynamodb_table = "jupiter-state-locking"
+    dynamodb_table = "jupiter-state2-locking"
     encrypt        = true
   }
 }
