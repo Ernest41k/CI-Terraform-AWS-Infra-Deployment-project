@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Abort early if not confirmed
       - name: Abort if not confirmed
         run: |
           if [ "${{ github.event.inputs.confirm_destroy }}" != "DESTROY" ]; then
@@ -20,10 +21,20 @@ jobs:
             exit 1
           fi
 
+      # 2️⃣ Checkout repo
       - uses: actions/checkout@v4
 
+      # 3️⃣ Write dev.tfvars from secret
+      - name: Write dev.tfvars
+        run: |
+          cat << 'EOF' > dev.tfvars
+${{ secrets.TFVARS_DEV }}
+EOF
+
+      # 4️⃣ Setup Terraform
       - uses: hashicorp/setup-terraform@v3
 
+      # 5️⃣ Configure AWS credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -31,11 +42,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
 
+      # 6️⃣ Terraform Init
       - name: Terraform Init
         run: terraform init
 
+      # 7️⃣ Terraform Plan Destroy
       - name: Terraform Plan Destroy
-        run: terraform plan -destroy -var-file=dev.tfvars -input=false
+        run: terraform plan -destroy -var-file=./dev.tfvars -input=false
 
+      # 8️⃣ Terraform Destroy
       - name: Terraform Destroy
-        run: terraform destroy -var-file=dev.tfvars -auto-approve -input=false
+        run: terraform destroy -var-file=./dev.tfvars -auto-approve -input=false
