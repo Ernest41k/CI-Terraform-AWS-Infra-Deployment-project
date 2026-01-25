@@ -42,12 +42,18 @@
 #       with:
 #         cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
-name: Terraform AWS Deploy (Dev)
+name: Terraform AWS Deploy (Dev) – PR-First, No Direct Main Push
 
 on:
-  push:
-    branches: [ "main" ]
+  # ✅ Run plan on pull requests targeting main
   pull_request:
+    branches:
+      - main
+
+  # 🚨 Run apply only after PR is merged to main
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -64,22 +70,22 @@ jobs:
 
     steps:
       # 1️⃣ Checkout repository
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       # 2️⃣ Configure AWS credentials from GitHub Secrets
-      - name: Configure AWS credentials
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
 
-      # 3️⃣ Setup Terraform
+      # 3️⃣ Setup Terraform CLI
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      # 4️⃣ Write dev.tfvars SAFELY (preserves quotes & newlines)
+      # 4️⃣ Write dev.tfvars safely from GitHub Secret
       - name: Write dev.tfvars
         run: |
           cat << 'EOF' > dev.tfvars
@@ -90,15 +96,21 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      # 6️⃣ Terraform Format Check
+      # 6️⃣ Select Terraform Workspace (dev)
+      - name: Select Terraform Workspace (dev)
+        run: |
+          terraform workspace select -or-create dev
+
+      # 7️⃣ Terraform Format Check (PR gate)
       - name: Terraform Format
         run: terraform fmt -check
 
-      # 7️⃣ Terraform Plan
-      - name: Terraform Plan
+      # 8️⃣ Terraform Plan (run on PR only)
+      - name: Terraform Plan (PR Only)
+        if: github.event_name == 'pull_request'
         run: terraform plan -var-file=dev.tfvars -input=false
 
-      # 8️⃣ Terraform Apply (only on push to main)
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      # 9️⃣ Terraform Apply (run only after PR merged to main)
+      - name: Terraform Apply (Main Only)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: terraform apply -var-file=dev.tfvars -auto-approve -input=false
