@@ -58,7 +58,7 @@ jobs:
       # 8️⃣ Select Terraform Workspace (dev)
       - name: Select Terraform Workspace (dev)
         run: |
-          terraform workspace select dev || terraform workspace new dev
+          terraform workspace select -or-create dev
 
       # 9️⃣ Terraform Plan Destroy (preview)
       - name: Terraform Plan Destroy

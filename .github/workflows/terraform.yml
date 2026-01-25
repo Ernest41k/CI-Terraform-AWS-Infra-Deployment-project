@@ -99,7 +99,7 @@ jobs:
       # 6️⃣ Select Terraform Workspace (dev)
       - name: Select Terraform Workspace (dev)
         run: |
-          terraform workspace select dev || terraform workspace new dev
+          terraform workspace select -or-create dev
 
       # 7️⃣ Terraform Format Check (PR gate)
       - name: Terraform Format
