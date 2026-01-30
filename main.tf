@@ -13,9 +13,9 @@ terraform {
 }
 
 module "vpc" {
-  source         = "./vpc"
-  vpc_cidr_block = var.vpc_cidr_block
-  tags           = local.project_tags
+  source                   = "./vpc"
+  vpc_cidr_block           = var.vpc_cidr_block
+  tags                     = local.project_tags
   public_subnet_cidr_block = var.public_subnet_cidr_block
-  availability_zone = var.availability_zone
+  availability_zone        = var.availability_zone
 }
