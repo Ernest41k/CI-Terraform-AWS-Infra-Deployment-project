@@ -13,6 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     environment: development-destroy
 
+    defaults:
+      run:
+        shell: bash
+
     steps:
       # 1️⃣ Hard stop if not main branch
       - name: Abort if not on main branch
@@ -31,39 +35,33 @@ jobs:
           fi
 
       # 3️⃣ Checkout repository
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      # 4️⃣ Write dev.tfvars from secret
-      - name: Write dev.tfvars
-        run: |
-          cat << 'EOF' > dev.tfvars
-          ${{ secrets.TFVARS_DEV }}
-          EOF
+      # 4️⃣ Setup Terraform CLI
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
 
-      # 5️⃣ Setup Terraform CLI
-      - uses: hashicorp/setup-terraform@v3
-
-      # 6️⃣ Configure AWS credentials
-      - name: Configure AWS credentials
+      # 5️⃣ Configure AWS credentials
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
 
-      # 7️⃣ Terraform Init
+      # 6️⃣ Terraform Init
       - name: Terraform Init
         run: terraform init
 
-      # 8️⃣ Select Terraform Workspace (dev)
+      # 7️⃣ Select Terraform Workspace (dev)
       - name: Select Terraform Workspace (dev)
-        run: |
-          terraform workspace select -or-create dev
+        run: terraform workspace select -or-create dev
 
-      # 9️⃣ Terraform Plan Destroy (preview)
+      # 8️⃣ Terraform Plan Destroy (preview)
       - name: Terraform Plan Destroy
         run: terraform plan -destroy -var-file=dev.tfvars -input=false
 
-      # 🔟 Terraform Destroy (approved + confirmed + main only)
+      # 9️⃣ Terraform Destroy (approved + confirmed + main only)
       - name: Terraform Destroy
         run: terraform destroy -var-file=dev.tfvars -auto-approve -input=false
