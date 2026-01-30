@@ -1,6 +1,6 @@
 # TERRAFORM COMMANDS
 - terraform force-unlock 25630c07-32bb-6a7c-03aa-8df05c4b86a1  | This will release terraform operation that did not complete cleanly due to state locking
-- terraform plan -var-file="def.tfvars"
+- terraform plan -var-file="dev.tfvars"
 - terraform apply -var-file="dev.tfvars" -auto-approve
 - terraform destroy -var-file="dev.tfvars" -auto-approve
 - terraform destroy -var-file="dev.tfvars" -target=aws_instance.example -auto-approve
@@ -65,4 +65,8 @@ AWS_SECRET_ACCESS_KEY
 - git reset --soft 3e4873f6ca0d38dc64191d94f5e43fdc313dc233  | Discards all changes completely
 - git log --oneline — Confirms HEAD now points to the target commit
 
-
+# 👉 Best practice after merging a feature branch
+(Most common & clean): Create a NEW feature branch for new work
+git checkout main
+git pull
+git checkout -b feature/next-work
