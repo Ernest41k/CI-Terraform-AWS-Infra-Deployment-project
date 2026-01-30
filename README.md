@@ -70,3 +70,14 @@ AWS_SECRET_ACCESS_KEY
 git checkout main
 git pull
 git checkout -b feature/next-work
+==========================================================================================================================
+🔧 What I recommend YOU do next (practical steps)
+Delete TFVARS_DEV
+Create env/dev.tfvars and commit it
+Move only true secrets to:
+TF_VAR_* GitHub secrets or
+AWS SSM
+Update GitHub Actions accordingly
+Add a short CONFIGURATION.md explaining:
+what lives where
+how to add new vars
